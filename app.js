@@ -5,6 +5,8 @@ const bookForm = document.getElementById('book-form');
 const title = document.getElementById('title');
 const author = document.getElementById('author');
 const isbn = document.getElementById('isbn');
+const list = document.getElementById('book-list');
+const main = document.querySelector('main');
 
 /*===============
 CONSTRUCTORS
@@ -22,9 +24,6 @@ function UI() {
 
   // add book to list method
   UI.prototype.addBookToList = function (book) {
-
-    // get table body
-    const list = document.getElementById('book-list');
     // create table row
     const row = document.createElement('tr');
     // insert table data
@@ -38,6 +37,35 @@ function UI() {
 
   }
 
+  // show alert
+  UI.prototype.showAlert = function (msg, className) {
+
+    // create div
+    const div = document.createElement('div');
+
+    // add classes
+    div.className = `alert ${className}`;
+
+    // add text
+    div.appendChild(document.createTextNode(msg));
+
+    // insert div
+    main.insertBefore(div, bookForm);
+
+    // timeout after 3 secs
+    setTimeout(function () {
+      document.querySelector('.alert').remove();
+    }, 3000);
+
+  }
+
+  // delete book
+  UI.prototype.deleteBook = function (target) {
+    if (target.className === 'delete') {
+      target.parentElement.parentElement.remove();
+    }
+  }
+
   // clear field method
   UI.prototype.clearFields = function () {
     title.value = '';
@@ -45,6 +73,28 @@ function UI() {
     isbn.value = '';
   }
 
+}
+
+/*================
+FUNCTIONS
+================*/
+
+function validate(ui, book) {
+
+  // check if form fields are empty
+  if (title.value === '' || author.value === '' || isbn.value === '') {
+    // alert error msg
+    ui.showAlert('Please fill in all fields', 'error');
+  } else {
+    // add the book
+    ui.addBookToList(book);
+
+    // show success
+    ui.showAlert('Book added!', 'success');
+
+    // clear form fields
+    ui.clearFields();
+  }
 }
 
 /*================
@@ -60,10 +110,23 @@ bookForm.addEventListener('submit', function (e) {
   // instance of UI object
   const ui = new UI();
 
-  // add the book
-  ui.addBookToList(book);
+  // validate
+  validate(ui, book);
 
-  // clear form fields
-  ui.clearFields();
   e.preventDefault();
+});
+
+// Listen for delete
+list.addEventListener('click', function (e) {
+
+  // instance of UI
+  const ui = new UI();
+
+  ui.deleteBook(e.target);
+
+  // show alert
+  ui.showAlert('Book deleted!', 'success');
+
+  e.preventDefault();
+
 });
